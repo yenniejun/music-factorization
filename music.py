@@ -1,26 +1,11 @@
-# This is like prime factorization of a scale, for me
-
 from itertools import cycle
 from enum import Enum
 
-
-# Maps each note in the 12-tone scale to a distinct number
-TWELVE_TONE = ['C', 'CSHARP', 'D', 'DSHARP', 'E', 'F', 
-'FSHARP', 'G', 'GSHARP', 'A', 'ASHARP', 'B']
-
-TWELVE_TONE = {1:'C', 2:'CSHARP', 3:'D', 4:'DSHARP', 5:'E', 6:'F', 
-7:'FSHARP', 8:'G', 9:'GSHARP', 10:'A', 11:'ASHARP', 12:'B'}
-
-TWELVE_TONE = {'C':1, 'CSHARP':2, 'D':3, 'DSHARP':4, 'E':5, 'F':6, 
+TWELVE_TONES = {'C':1, 'CSHARP':2, 'D':3, 'DSHARP':4, 'E':5, 'F':6, 
 'FSHARP':7, 'G':8, 'GSHARP':9, 'A':10, 'ASHARP':11, 'B':12}
 
-# Test cale should not repeat any notes on either end of octave
-TEST_SCALE = ['C', 'D', 'E', 'G', 'A', 'B', 'C'] 
-
-pentatonic = [1, 3, 5, 8, 10, 12]
-pentatonic2 = [3,5,8,10,12,1]
-
-intervals = {
+# TODO clean up the globals, it's a bit messy now...
+intervals = { 
 	0: "UNISON",
 	1: "CHROMATIC",
 	2: "WHOLE TONE",
@@ -38,13 +23,16 @@ AUG = 4
 TRI = 6
 OCT = 12
 
-def map_num_to_interval(my_number):
-	switch()
-
-def convert_scale:
-	# TODO: convert scale from letters to numbers
+def convert_scale(raw_scale):
+	scale = []
+	for letter in raw_scale:
+		scale.append(TWELVE_TONES[letter])
+	if (scale[-1] == scale[0] and scale[-1] < scale[-2]):
+		return scale[:-1]
+	return scale
 	# TODO: If last note is same as first note mod, then remove last note
-
+	# TODO: Eventually add capability to sort scales 
+	# ... OR ... support infinitely high octaves
 
 
 # Finds the longest contiguous chunk (including wrapping) given params
@@ -138,8 +126,9 @@ def print_results(results):
 
 
 
-# For Pentatonic
-scale = [1, 3, 5, 8, 10, 12]
+# Testing:
+TEST_SCALE = ['C', 'D', 'E', 'G', 'A', 'B', 'C'] 
+scale = convert_scale(TEST_SCALE)
 list_of_intervals1 = [DIM, DIM, DIM, WHT, WHT, CHR, UNI]
 print_results(fetch_scale_components(list_of_intervals1, scale))
 list_of_intervals2 = [WHT, WHT, CHR, UNI]
