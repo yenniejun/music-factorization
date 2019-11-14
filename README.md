@@ -14,3 +14,10 @@ In modern music theory, there are twelve chromatic (semi-tone) notes in one octa
 I wanted to write something that "factorized"  scales into parts that could be understood with combinations of the above "symmetric" scales. For example, the scale
 `A B C D E G A`
 can be understood as a combination of two 3-note segements of the whole tone scale (`C D E` and `G A B`). It can also be understood as a combination of one 2-note segment of the tritone scale (`E G`) and two 2-note segments of the whole tone scale(`A B`, `C, D`).
+
+## Tests
+I have some rudimentary unit tests that tests each function. Eventually, would like to add mock and test some more scenarios.
+You can run these simply with `python3 tests.py`
+
+## Future
+This is just the basic vision of what I want to achieve. Eventually I would like to add the UI element of showing how one scale can be split into different components in different ways, and of letting the user input their specified scale.

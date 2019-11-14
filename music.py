@@ -1,66 +1,55 @@
 from itertools import chain
-from enum import Enum
-import unittest
 
-TWELVE_TONES = {'C':1, 'CSHARP':2, 'D':3, 'DSHARP':4, 'EFLAT':4, 'E':5, 'F':6, 
+TWELVE_TONES = {'C':1, 'CSHARP':2, 'DFLAT': 2, 'D':3, 'DSHARP':4, 'EFLAT':4, 'E':5, 'F':6, 
 'FSHARP':7, 'G':8, 'GSHARP':9, 'AFLAT':9, 'A':10, 'ASHARP':11, 'BFLAT': 11, 'B':12}
 
-# TODO clean up the globals, it's a bit messy now...
-intervals = { 
-	0: "UNISON",
-	1: "CHROMATIC",
-	2: "WHOLE TONE",
-	3: "DIMINISHED",
-	4: "AUGMENTED",
-	6: "TRITONE",
-	12: "OCTAVE"
-}
+intervals = { 0: "UNISON",1: "CHROMATIC",2: "WHOLE TONE",3: "DIMINISHED",
+4: "AUGMENTED",6: "TRITONE",12: "OCTAVE"}
 
-UNI = 0
-CHR = 1
-WHT = 2
-DIM = 3
-AUG = 4
-TRI = 6
-OCT = 12
+UNI = 0; CHR = 1; WHT = 2; DIM = 3; AUG = 4; TRI = 6; OCT = 12
 
-class TestMethods
 
 def convert_scale(raw_scale):
+	"""Converts the provided scale to corresponding numbers
+
+	Parameters:
+		raw_scale: a scale in letter format, assumed to be 1 octave only
+
+	ToDo: Add capability to sort scales
+	ToDo: Add capability to support infinitely high octaves
+	"""
+
 	scale = []
 	for letter in raw_scale:
-		scale.append(TWELVE_TONES[letter])
-	if (scale[-1] == scale[0] and scale[-1] < scale[-2]):
+		if (letter in TWELVE_TONES.keys()):
+			scale.append(TWELVE_TONES[letter])
+	if (len(scale) > 1 and scale[-1] == scale[0] and scale[-1] < scale[-2]):
 		return scale[:-1]
 	return scale
-	# TODO: If last note is same as first note mod, then remove last note
-	# TODO: Eventually add capability to sort scales 
-	# ... OR ... support infinitely high octaves
 
 
-# Finds the longest contiguous chunk (including wrapping) given params
-# 
-# PARAMS:
-#    - scale: should NOT repeat the octave note 
-#    - interval: Should be between 0 and 12. Can be larger but mod 12
-#    - wrap (optional): Do you want to wrap the scale to find intervals
-#      as part of the cycle? Default set to true..
-#      Note: Wraps by doubling then removing last item
-#
-##### Returns: #####
-#  max_seq_head - the index where the longest sequence starts
-#  max_chunk - the size of the longest chunk/sequence
 def find_longest_chunk(input_scale, interval, wrap=True):
+	"""Finds the longest contiguous chunk of given internval for given scale
+
+	Parameters:
+		input_scale: the scale to search for the longest chunk
+		interval: the interval to determine the longest chunk; between 0 and 12
+		wrap (optional): default true; determines if you wish to wrap to scale 
+			Wrapping is done by doubling the original scale, adding 12, then removing last item
+
+	Returns:
+		max_seq_head: index of where the longest sequence starts
+		max_chunk: size of the longest chunk/sequence
+	"""
+
 	if wrap: 
 		scale = input_scale + [i+12 for i in input_scale[:-1]]
-		# scale = (input_scale * 2)[:-1]
 	else:
 		scale = input_scale # double the scale so we have one full cycle
 	max_chunk = chunk = 1;
 	max_seq_head = seq_head = 0;
 	# counting number of diminished intervals in this cycle
 	for i in range(0, len(scale)-1):
-		# print('before if', (scale[i%len(scale)]+interval) % 12, scale[(i%len(scale)+1)] % 12)
 		current_index = i 
 		next_index = i + 1
 		current_value = scale[i]
@@ -81,11 +70,20 @@ def find_longest_chunk(input_scale, interval, wrap=True):
 	return (max_seq_head, max_chunk)
 
 
-
-# Finds the components for the given interval, scale, and num of repetitions
-# Repetitions means how many times you want to look for instance of
-# the given interval in the given scale
 def find_scale_components(interval, scale, repeat=1):
+	""" Finds the list of scale components for given interval
+
+	Parameters:
+		interval: the interval to determine the longest chunk; between 0 and 12
+		scale: the scale to search for the longest chunk
+		repeat (optional): default set to 1. Determines number of times you want to look for instance of 
+			the given interval in the scale
+
+	Returns:
+		scale_components: a list with all of the different contiguous components of 
+		given interval
+	"""
+	
 	scale_remainder = len(scale)
 	scale_components = []
 	index = 0
@@ -105,7 +103,29 @@ def find_scale_components(interval, scale, repeat=1):
 		repeat_counter += 1
 	return scale_components
 
+
+def isDescending(lst):
+	"""Returns false if list is not descending"""
+	for i in range( len(lst) - 1 ):
+		if lst[i] < lst[i+1]:
+			return False
+		return True
+	return True
+
+
 def fetch_scale_components(list_of_intervals, scale):
+	""" Fetches scale components for given list of intervals
+
+	Parameters:
+		list_of_intervals: the different intervals you wish to search for in the scale
+			MUST be in descending order
+		scale: the scale to search for the longest chunk
+
+	Returns:
+		full_results: a list with all of the different contiguous components for all the intervlas 
+	"""
+	if (isDescending(list_of_intervals) == False): 
+		return []
 	mask = [-1] * len(scale)
 	temp = scale[:]
 	full_results = results = []
@@ -118,46 +138,25 @@ def fetch_scale_components(list_of_intervals, scale):
 		if (len(results)==0):
 			continue
 		full_results += results
-		# print('full results', full_results)
 		for result in results:
 			index = result['index']
 			chunk = result['len_chunk']
 			scale_len = len(scale)
-			# print(index, chunk, scale_len)
 			if (index+chunk <= scale_len) :
 				temp[index:chunk+index] = [-1] * chunk
 			else :
 				chunk_1 = scale_len - index
 				chunk_2 = chunk - chunk_1
-				# print('chunks', chunk, chunk_1, chunk_2)
 				temp[index:index+chunk_1] = [-1] * chunk_1
 				temp[0:chunk_2] = [-1] * chunk_2
-		# print(temp)
 		results = []
 	return full_results
 
 
 def print_results(results):
+	"""Prints the results in a nicer format"""
 	for result in results:
-		interval_name = intervals[result['interval']]
+		interval_name = musicenums.intervals[result['interval']]
 		note_count = result['len_chunk']
 		starting_index = result['index']
 		print(note_count, interval_name, "starting at index", starting_index)
-
-
-
-# Testing:
-TEST_SCALE = ['C', 'D', 'E', 'G', 'A', 'B', 'C'] 
-MAJOR_SCALE = ['C', 'D', 'E', 'F', 'G', 'A', 'B', 'C']
-MINOR_SCALE = ['C', 'D', 'DSHARP', 'F', 'G', 'GSHARP', 'B', 'C']
-DIM_SCALE = ['C', 'DSHARP', '']
-scale = convert_scale(MINOR_SCALE)
-list_of_intervals1 = [DIM, DIM, DIM, WHT, WHT, CHR]
-print_results(fetch_scale_components(list_of_intervals1, scale))
-list_of_intervals2 = [WHT, WHT, CHR, UNI]
-print_results(fetch_scale_components(list_of_intervals2, scale))
-
-list_of_intervals3 = [AUG, DIM, WHT]
-print_results(fetch_scale_components(list_of_intervals3, scale))
-
-

@@ -54,6 +54,19 @@ class Tests(unittest.TestCase):
 		assert(results[0]['len_chunk'] == 3)
 		assert(results[0]['index'] == 0)
 
+	def test_find_scale_components_twice(self):
+		scale=[1,2,3,5,6,7]
+		interval = 1
+		repeat = 2
+		results = music.find_scale_components(interval, scale, repeat)
+		assert(len(results) == 2)
+		assert(results[0]['interval'] == 1)
+		assert(results[0]['len_chunk'] == 3)
+		assert(results[0]['index'] == 0)
+		assert(results[1]['interval'] == 1)
+		assert(results[1]['len_chunk'] == 3)
+		assert(results[1]['index'] == 3)
+
 	##### fetch_scale_components #####
 
 	def test_fetch_scale_components_major_scale(self):
