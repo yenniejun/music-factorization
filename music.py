@@ -93,63 +93,49 @@ def find_scale_components(interval, scale, repeat=1):
 	len_scale = len(scale)
 	repeat_counter = 0;
 	while (scale_remainder > 0 and repeat_counter < repeat):
-		# print('scale components:', scale_components)
 		starting_index = index + len_chunk
 		ending_index = index + len_scale
-		# print(index, len_chunk, len_scale)
-		# print(starting_index, ending_index)
-		# print(scale)
 		index, len_chunk = find_longest_chunk(scale[starting_index:ending_index], interval)
-		# print('   index:', index, starting_index, ending_index)
-		# print('   scale:', scale[starting_index:ending_index], interval)
-		# if (index == -1): 
-		# 	print('NEGATIVE')
-		# 	return scale_components
-		# print(index, len_chunk)
 		if (len_chunk >1):
 			scale_components.append({'interval': interval,
 							'len_chunk': len_chunk,
 							'index': (starting_index + index)%len_scale
 							 })
-		# print(scale_components)
 		scale_remainder -= len_chunk
 		repeat_counter += 1
 	return scale_components
-
-find_scale_components(2, [1, 3, 4, -1, -1, -1, -1], 2)
-
-find_scale_components(3, [1, 3, 4, 6, 8, -1, -1], 2)
 
 def fetch_scale_components(list_of_intervals, scale):
 	mask = [-1] * len(scale)
 	temp = scale[:]
 	full_results = results = []
-	pool = chain(list_of_intervals*2)
-	while (mask != temp):
-		results = find_scale_components(next(pool), temp, 2)
-		# print('results', results)
-		# print('temp', temp)
+	pool = chain(list_of_intervals)
+	for interval in list_of_intervals:
+		if(mask == temp):
+			return full_results
+		next_value = next(pool)
+		results = find_scale_components(next_value, temp)
 		if (len(results)==0):
 			continue
 		full_results += results
+		# print('full results', full_results)
 		for result in results:
 			index = result['index']
 			chunk = result['len_chunk']
 			scale_len = len(scale)
-			print(index, chunk, scale_len)
+			# print(index, chunk, scale_len)
 			if (index+chunk <= scale_len) :
 				temp[index:chunk+index] = [-1] * chunk
 			else :
 				chunk_1 = scale_len - index
 				chunk_2 = chunk - chunk_1
-				print('chunks', chunk, chunk_1, chunk_2)
+				# print('chunks', chunk, chunk_1, chunk_2)
 				temp[index:index+chunk_1] = [-1] * chunk_1
 				temp[0:chunk_2] = [-1] * chunk_2
-		print(temp)
+		# print(temp)
 		results = []
 	return full_results
 
-fetch_scale_components([DIM, WHT, CHR], scale)
 
 def print_results(results):
 	for result in results:
@@ -165,13 +151,13 @@ TEST_SCALE = ['C', 'D', 'E', 'G', 'A', 'B', 'C']
 MAJOR_SCALE = ['C', 'D', 'E', 'F', 'G', 'A', 'B', 'C']
 MINOR_SCALE = ['C', 'D', 'DSHARP', 'F', 'G', 'GSHARP', 'B', 'C']
 DIM_SCALE = ['C', 'DSHARP', '']
-scale = convert_scale(TEST_SCALE)
-list_of_intervals1 = [DIM, DIM, DIM, WHT, WHT, CHR, UNI]
+scale = convert_scale(MINOR_SCALE)
+list_of_intervals1 = [DIM, DIM, DIM, WHT, WHT, CHR]
 print_results(fetch_scale_components(list_of_intervals1, scale))
 list_of_intervals2 = [WHT, WHT, CHR, UNI]
 print_results(fetch_scale_components(list_of_intervals2, scale))
 
-list_of_intervals3 = [DIM, DIM, WHT, WHT, CHR]
+list_of_intervals3 = [AUG, DIM, WHT]
 print_results(fetch_scale_components(list_of_intervals3, scale))
 
 
