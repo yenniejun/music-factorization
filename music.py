@@ -8,6 +8,8 @@ INTERVALS = { 0: "UNISON",1: "CHROMATIC",2: "WHOLE TONE",3: "DIMINISHED",
 
 UNI = 0; CHR = 1; WHT = 2; DIM = 3; AUG = 4; TRI = 6; OCT = 12
 
+TWELVE = 12
+
 
 def convert_scale(raw_scale):
 	"""Converts the provided scale to corresponding numbers
@@ -43,7 +45,7 @@ def find_longest_count_for_interval(scale, interval):
 	max_count = count = 1
 	max_head = head = -1
 	for i in range(0, len(scale) - 1):
-		if scale[i] + interval == scale[i+1]:
+		if ((scale[i] + interval) % 12) == (scale[i+1] % 12):
 			count += 1
 			if head == -1:
 				head = i 
@@ -62,12 +64,7 @@ def find_longest_count_for_interval(scale, interval):
 		return (max_head, max_count)
 	# else, just continue the current streak
 	for i in range(-1, head-1):
-		if (i == -1):
-			if scale[i] + interval == scale[i+1]+12: 
-				count += 1
-			else: 
-				break;
-		elif scale[i] + interval == scale[i+1]:
+		if ((scale[i] + interval) % 12) == (scale[i+1] % 12):
 			count += 1
 		else: 
 			break
@@ -75,6 +72,10 @@ def find_longest_count_for_interval(scale, interval):
 		max_count = count
 		max_head = head	
 	return (max_head, max_count)
+
+
+find_longest_count_for_interval([9,11,1],2)
+
 
 
 def find_scale_components(scale, interval, repeat=1):
