@@ -1,6 +1,5 @@
 import unittest
 import music
-import musicenums
 
 class Tests(unittest.TestCase):
 
@@ -18,38 +17,47 @@ class Tests(unittest.TestCase):
 	def test_convert_scale_blank(self):
 		assert music.convert_scale([]) == []
 
-	##### find_longest_chunk ######
+	##### find_longest_count_for_interval #####
+	def test_find_longest_count_normal_case(self):
+		_index, _count = music.find_longest_count_for_interval([1,2,3,4,5],1)
+		assert(_index == 0 and _count == 5)
 
-	def test_find_longest_chunk_empty(self):
-		_index, _chunk = music.find_longest_chunk([], 1)
-		assert (_chunk == 1)
+	def test_find_longest_count_longest_chunk_at_beginning(self):
+		_index, _count = music.find_longest_count_for_interval([1,3,5,7,8,10],2)
+		assert(_index == 0 and _count == 4)	
 
-	def test_find_longest_chunk_at_beginning(self):
-		scale = [1,2,3,4,5,7,10]
-		_index, _chunk = music.find_longest_chunk(scale, 1)
-		assert (_index == 0 and _chunk == 5)
+	def test_find_longest_count_longest_chunk_at_end(self):
+		_index, _count = music.find_longest_count_for_interval([3,5,6,8,10,12],2)
+		assert(_index == 2 and _count == 4)		
 
-	def test_find_longest_chunk_at_end(self):
-		scale = [1,2,7,9,11,13]
-		_index, _chunk = music.find_longest_chunk(scale, 2)
-		assert (_index == 2 and _chunk == 4)
+	def test_find_longest_count_extra_noise(self):
+		_index, _count = music.find_longest_count_for_interval([1,2,3,5,7,9],1)
+		assert(_index == 0 and _count == 3)	
 
-	def test_find_longest_chunk_wrapping_loop(self):
-		scale = [1,3,7,9,11]
-		_index, _chunk = music.find_longest_chunk(scale, 2)
-		assert (_index == 2 and _chunk == 5)
+	def test_find_longest_count_nowrap_entirescale(self):
+		_index, _count = music.find_longest_count_for_interval([1,3,5,7,9,11],2)
+		assert(_index == 0 and _count == 6)	
 
-	def test_find_longest_chunk_wrapping_notloop(self):
-		scale = [1,2,3,7,9,11]
-		_index, _chunk = music.find_longest_chunk(scale, 2)
-		assert (_index == 3 and _chunk == 4)
+	def test_find_longest_count_wrapping_entirescale(self):
+		_index, _count = music.find_longest_count_for_interval([1,3,7,9,11],2)
+		assert(_index == 2 and _count == 5)	
+
+	def test_find_longest_count_wrapping_is_longest(self):
+		_index, _count = music.find_longest_count_for_interval([1,2,3,5,6,7,8,11,12],1)
+		assert(_index == 7 and _count == 5)	
+
+	def test_find_longest_count_wrapping_is_not_longest(self):
+		_index, _count = music.find_longest_count_for_interval([1,3,5,6,7,8,11,12],1)
+		assert(_index == 2 and _count == 4)	
+
+		
 
 	##### find_scale_components #####
 
 	def test_find_scale_components(self):
 		scale = [1,2,3]
 		interval = 1
-		results = music.find_scale_components(interval, scale)
+		results = music.find_scale_components(scale, interval)
 		assert(len(results) == 1)
 		assert(results[0]['len_chunk'] == 3)
 		assert(results[0]['index'] == 0)
@@ -58,7 +66,7 @@ class Tests(unittest.TestCase):
 		scale=[1,2,3,5,6,7]
 		interval = 1
 		repeat = 2
-		results = music.find_scale_components(interval, scale, repeat)
+		results = music.find_scale_components(scale, interval, repeat)
 		assert(len(results) == 2)
 		assert(results[0]['interval'] == 1)
 		assert(results[0]['len_chunk'] == 3)

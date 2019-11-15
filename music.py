@@ -3,7 +3,7 @@ from itertools import chain
 TWELVE_TONES = {'C':1, 'CSHARP':2, 'DFLAT': 2, 'D':3, 'DSHARP':4, 'EFLAT':4, 'E':5, 'F':6, 
 'FSHARP':7, 'G':8, 'GSHARP':9, 'AFLAT':9, 'A':10, 'ASHARP':11, 'BFLAT': 11, 'B':12}
 
-intervals = { 0: "UNISON",1: "CHROMATIC",2: "WHOLE TONE",3: "DIMINISHED",
+INTERVALS = { 0: "UNISON",1: "CHROMATIC",2: "WHOLE TONE",3: "DIMINISHED",
 4: "AUGMENTED",6: "TRITONE",12: "OCTAVE"}
 
 UNI = 0; CHR = 1; WHT = 2; DIM = 3; AUG = 4; TRI = 6; OCT = 12
@@ -27,50 +27,57 @@ def convert_scale(raw_scale):
 		return scale[:-1]
 	return scale
 
+# TODO REFACTOR THIS
 
-def find_longest_chunk(input_scale, interval, wrap=True):
+def find_longest_count_for_interval(scale, interval):
 	"""Finds the longest contiguous chunk of given internval for given scale
 
 	Parameters:
-		input_scale: the scale to search for the longest chunk
+		scale: the scale to search for the longest chunk
 		interval: the interval to determine the longest chunk; between 0 and 12
-		wrap (optional): default true; determines if you wish to wrap to scale 
-			Wrapping is done by doubling the original scale, adding 12, then removing last item
 
 	Returns:
-		max_seq_head: index of where the longest sequence starts
-		max_chunk: size of the longest chunk/sequence
+		max_head: index of where the longest sequence starts
+		max_count: size of the longest chunk/sequence
 	"""
+	max_count = count = 1
+	max_head = head = -1
+	for i in range(0, len(scale) - 1):
+		if scale[i] + interval == scale[i+1]:
+			count += 1
+			if head == -1:
+				head = i 
+			# else, don't update head
+		else:
+			if (count > max_count):
+				max_count = count
+				max_head = head
+			# reset
+			count = 1; head = -1
+	if (count > max_count):
+		max_count = count
+		max_head = head	
+	# If max count is same as scale len, then no need to check for wrapping
+	if (max_count == len(scale)):
+		return (max_head, max_count)
+	# else, just continue the current streak
+	for i in range(-1, head-1):
+		if (i == -1):
+			if scale[i] + interval == scale[i+1]+12: 
+				count += 1
+			else: 
+				break;
+		elif scale[i] + interval == scale[i+1]:
+			count += 1
+		else: 
+			break
+	if (count > max_count):
+		max_count = count
+		max_head = head	
+	return (max_head, max_count)
 
-	if wrap: 
-		scale = input_scale + [i+12 for i in input_scale[:-1]]
-	else:
-		scale = input_scale # double the scale so we have one full cycle
-	max_chunk = chunk = 1;
-	max_seq_head = seq_head = 0;
-	# counting number of diminished intervals in this cycle
-	for i in range(0, len(scale)-1):
-		current_index = i 
-		next_index = i + 1
-		current_value = scale[i]
-		next_value = scale[i+1]
-		if (current_value + interval == next_value):
-			if (chunk == 1) :
-				seq_head = i
-			chunk += 1
-		else :
-			if (chunk > max_chunk):
-				max_chunk = chunk
-				max_seq_head = seq_head
-			chunk = 1 # reset
-			seq_head = -1 #reset
-	if (chunk > max_chunk):
-		max_chunk = chunk
-		max_seq_head = seq_head
-	return (max_seq_head, max_chunk)
 
-
-def find_scale_components(interval, scale, repeat=1):
+def find_scale_components(scale, interval, repeat=1):
 	""" Finds the list of scale components for given interval
 
 	Parameters:
@@ -93,8 +100,8 @@ def find_scale_components(interval, scale, repeat=1):
 	while (scale_remainder > 0 and repeat_counter < repeat):
 		starting_index = index + len_chunk
 		ending_index = index + len_scale
-		index, len_chunk = find_longest_chunk(scale[starting_index:ending_index], interval)
-		if (len_chunk >1):
+		index, len_chunk = find_longest_count_for_interval(scale[starting_index:ending_index], interval)
+		if (index != -1):
 			scale_components.append({'interval': interval,
 							'len_chunk': len_chunk,
 							'index': (starting_index + index)%len_scale
@@ -134,7 +141,8 @@ def fetch_scale_components(list_of_intervals, scale):
 		if(mask == temp):
 			return full_results
 		next_value = next(pool)
-		results = find_scale_components(next_value, temp)
+		results = find_scale_components(temp, next_value)
+		# print(results, type(results))
 		if (len(results)==0):
 			continue
 		full_results += results
@@ -152,11 +160,10 @@ def fetch_scale_components(list_of_intervals, scale):
 		results = []
 	return full_results
 
-
 def print_results(results):
 	"""Prints the results in a nicer format"""
 	for result in results:
-		interval_name = musicenums.intervals[result['interval']]
+		interval_name = INTERVALS[result['interval']]
 		note_count = result['len_chunk']
 		starting_index = result['index']
 		print(note_count, interval_name, "starting at index", starting_index)
