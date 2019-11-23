@@ -10,6 +10,8 @@ UNI = 0; CHR = 1; WHT = 2; DIM = 3; AUG = 4; TRI = 6; OCT = 12
 
 TWELVE = 12
 
+MINUS_MASK = -10000
+
 
 def convert_scale(raw_scale):
 	"""Converts the provided scale to corresponding numbers
@@ -22,7 +24,8 @@ def convert_scale(raw_scale):
 	"""
 
 	scale = []
-	for letter in raw_scale:
+	upper_raw_scale = [a.upper() for a in raw_scale]
+	for letter in upper_raw_scale:
 		if (letter in TWELVE_TONES.keys()):
 			scale.append(TWELVE_TONES[letter])
 	if (len(scale) > 1 and scale[-1] == scale[0] and scale[-1] < scale[-2]):
@@ -42,40 +45,35 @@ def find_longest_count_for_interval(scale, interval):
 		max_head: index of where the longest sequence starts
 		max_count: size of the longest chunk/sequence
 	"""
+
 	max_count = count = 1
 	max_head = head = -1
 	for i in range(0, len(scale) - 1):
 		if ((scale[i] + interval) % 12) == (scale[i+1] % 12):
+			if count == 1:
+				head = i
 			count += 1
-			if head == -1:
-				head = i 
-			# else, don't update head
 		else:
 			if (count > max_count):
 				max_count = count
 				max_head = head
-			# reset
-			count = 1; head = -1
-	if (count > max_count):
-		max_count = count
-		max_head = head	
+			count = 1; head = -1 # reset
+
 	# If max count is same as scale len, then no need to check for wrapping
 	if (max_count == len(scale)):
 		return (max_head, max_count)
-	# else, just continue the current streak
+	# Check for wrapping: either continue current streak or start with last element of scale
+	head = head if head != -1 else len(scale) - 1
 	for i in range(-1, head-1):
 		if ((scale[i] + interval) % 12) == (scale[i+1] % 12):
 			count += 1
-		else: 
+		else: #
 			break
+
 	if (count > max_count):
 		max_count = count
 		max_head = head	
 	return (max_head, max_count)
-
-
-find_longest_count_for_interval([9,11,1],2)
-
 
 
 def find_scale_components(scale, interval, repeat=1):
@@ -91,7 +89,7 @@ def find_scale_components(scale, interval, repeat=1):
 		scale_components: a list with all of the different contiguous components of 
 		given interval
 	"""
-	
+
 	scale_remainder = len(scale)
 	scale_components = []
 	index = 0
@@ -103,10 +101,10 @@ def find_scale_components(scale, interval, repeat=1):
 		ending_index = index + len_scale
 		index, len_chunk = find_longest_count_for_interval(scale[starting_index:ending_index], interval)
 		if (index != -1):
-			scale_components.append({'interval': interval,
-							'len_chunk': len_chunk,
-							'index': (starting_index + index)%len_scale
-							 })
+			scale_components.append({
+				'interval': interval,
+				'len_chunk': len_chunk,
+				'index': (starting_index + index)%len_scale })
 		scale_remainder -= len_chunk
 		repeat_counter += 1
 	return scale_components
@@ -132,34 +130,35 @@ def fetch_scale_components(list_of_intervals, scale):
 	Returns:
 		full_results: a list with all of the different contiguous components for all the intervlas 
 	"""
-	if (isDescending(list_of_intervals) == False): 
+
+	if (not isDescending(list_of_intervals)): 
 		return []
-	mask = [-1] * len(scale)
+	mask = [MINUS_MASK] * len(scale)
 	temp = scale[:]
 	full_results = results = []
 	pool = chain(list_of_intervals)
+	scale_len = len(scale)
 	for interval in list_of_intervals:
 		if(mask == temp):
 			return full_results
 		next_value = next(pool)
 		results = find_scale_components(temp, next_value)
-		# print(results, type(results))
 		if (len(results)==0):
 			continue
 		full_results += results
 		for result in results:
 			index = result['index']
 			chunk = result['len_chunk']
-			scale_len = len(scale)
 			if (index+chunk <= scale_len) :
-				temp[index:chunk+index] = [-1] * chunk
+				temp[index:chunk+index] = [MINUS_MASK] * chunk
 			else :
 				chunk_1 = scale_len - index
 				chunk_2 = chunk - chunk_1
-				temp[index:index+chunk_1] = [-1] * chunk_1
-				temp[0:chunk_2] = [-1] * chunk_2
+				temp[index:index+chunk_1] = [MINUS_MASK] * chunk_1
+				temp[0:chunk_2] = [MINUS_MASK] * chunk_2
 		results = []
 	return full_results
+
 
 def print_results(results):
 	"""Prints the results in a nicer format"""

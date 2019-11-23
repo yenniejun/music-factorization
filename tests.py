@@ -50,7 +50,13 @@ class Tests(unittest.TestCase):
 		_index, _count = music.find_longest_count_for_interval([1,3,5,6,7,8,11,12],1)
 		assert(_index == 2 and _count == 4)	
 
-		
+	def test_find_longest_count_wrapping_starts_at_last_element(self):
+		_index, _count = music.find_longest_count_for_interval([10, 12, -1000, -1000, -1000, 8], 2)
+		assert(_index == 5 and _count == 3)
+
+	def test_find_longest_count_wrapping_starts_second_to_last_element(self): 
+		_index, _count = music.find_longest_count_for_interval([10, 12, -1000, -1000, 6, 8], 2)
+		assert(_index == 4 and _count == 4)
 
 	##### find_scale_components #####
 
