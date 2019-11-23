@@ -17,7 +17,29 @@ class Tests(unittest.TestCase):
 	def test_convert_scale_blank(self):
 		assert music.convert_scale([]) == []
 
+	###### is_correct_interval #####
+
+	def test_is_correct_interval_true(self):
+		assert(music.is_correct_interval(1, [1,2,3], 1) == True)
+
+	def test_is_correct_interval_false(self):
+		assert(music.is_correct_interval(1, [1,2,3], 2) == False)
+
+	def test_is_correct_interval_false_oob(self):
+		assert(music.is_correct_interval(3, [1,2,3], 1) == False)
+
+	##### update_max_count #####
+
+	def test_update_max_count_old_max(self):
+		_max_count, _max_head = music.update_max_count(1,10,2,20)
+		assert(_max_count == 10 and _max_head == 20)
+
+	def test_update_max_count_new_max(self):
+		_max_count, _max_head = music.update_max_count(10,1,20,2)
+		assert(_max_count == 10 and _max_head == 20)
+
 	##### find_longest_count_for_interval #####
+
 	def test_find_longest_count_normal_case(self):
 		_index, _count = music.find_longest_count_for_interval([1,2,3,4,5],1)
 		assert(_index == 0 and _count == 5)

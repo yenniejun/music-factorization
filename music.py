@@ -32,7 +32,17 @@ def convert_scale(raw_scale):
 		return scale[:-1]
 	return scale
 
-# TODO REFACTOR THIS
+def update_max_count(count, max_count, head, max_head):
+	""" Returns the updated max count and max head while determining longest count for interval"""
+	if count > max_count:
+		return (count, head)
+	return (max_count, max_head)
+
+def is_correct_interval(i, scale, interval):
+	""" Checks if the value at scale[i] is an interval-size from i+1"""
+	if i >= len(scale): return False
+	return ((scale[i] + interval) % TWELVE) == (scale[i+1] % TWELVE)
+
 
 def find_longest_count_for_interval(scale, interval):
 	"""Finds the longest contiguous chunk of given internval for given scale
@@ -45,34 +55,26 @@ def find_longest_count_for_interval(scale, interval):
 		max_head: index of where the longest sequence starts
 		max_count: size of the longest chunk/sequence
 	"""
-
 	max_count = count = 1
 	max_head = head = -1
 	for i in range(0, len(scale) - 1):
-		if ((scale[i] + interval) % 12) == (scale[i+1] % 12):
-			if count == 1:
-				head = i
+		if (is_correct_interval(i, scale, interval)):
+			head = i if count == 1 else head
 			count += 1
 		else:
-			if (count > max_count):
-				max_count = count
-				max_head = head
+			max_count, max_head = update_max_count(count, max_count, head, max_head)
 			count = 1; head = -1 # reset
-
 	# If max count is same as scale len, then no need to check for wrapping
 	if (max_count == len(scale)):
 		return (max_head, max_count)
 	# Check for wrapping: either continue current streak or start with last element of scale
 	head = head if head != -1 else len(scale) - 1
 	for i in range(-1, head-1):
-		if ((scale[i] + interval) % 12) == (scale[i+1] % 12):
+		if (is_correct_interval(i, scale, interval)):
 			count += 1
 		else: #
 			break
-
-	if (count > max_count):
-		max_count = count
-		max_head = head	
+	max_count, max_head = update_max_count(count, max_count, head, max_head)
 	return (max_head, max_count)
 
 
@@ -92,10 +94,7 @@ def find_scale_components(scale, interval, repeat=1):
 
 	scale_remainder = len(scale)
 	scale_components = []
-	index = 0
-	len_chunk = 0
-	len_scale = len(scale)
-	repeat_counter = 0;
+	index = 0; len_chunk = 0; len_scale = len(scale); repeat_counter = 0;
 	while (scale_remainder > 0 and repeat_counter < repeat):
 		starting_index = index + len_chunk
 		ending_index = index + len_scale
