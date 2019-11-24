@@ -37,6 +37,7 @@ def print_outputs(outputs):
 def main():
 	my_input = list(map(str, input("Describe your scale using letters separated by a space:\n").split())) 
 	scale = music.convert_scale([a.upper() for a in my_input])
+	print('converted scale', scale)
 	outputs = get_outputs(scale)
 	print_outputs(outputs)
 	

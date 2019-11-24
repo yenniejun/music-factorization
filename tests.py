@@ -28,6 +28,9 @@ class Tests(unittest.TestCase):
 	def test_is_correct_interval_false_oob(self):
 		assert(music.is_correct_interval(3, [1,2,3], 1) == False)
 
+	def test_is_correct_interval_matches_mask(self):
+		assert(music.is_correct_interval(0, [music.MINUS_MASK, 10], 2) == False)
+
 	##### update_max_count #####
 
 	def test_update_max_count_old_max(self):
@@ -73,11 +76,11 @@ class Tests(unittest.TestCase):
 		assert(_index == 2 and _count == 4)	
 
 	def test_find_longest_count_wrapping_starts_at_last_element(self):
-		_index, _count = music.find_longest_count_for_interval([10, 12, -1000, -1000, -1000, 8], 2)
+		_index, _count = music.find_longest_count_for_interval([10, 12, music.MINUS_MASK, music.MINUS_MASK, music.MINUS_MASK, 8], 2)
 		assert(_index == 5 and _count == 3)
 
 	def test_find_longest_count_wrapping_starts_second_to_last_element(self): 
-		_index, _count = music.find_longest_count_for_interval([10, 12, -1000, -1000, 6, 8], 2)
+		_index, _count = music.find_longest_count_for_interval([10, 12, music.MINUS_MASK, music.MINUS_MASK, 6, 8], 2)
 		assert(_index == 4 and _count == 4)
 
 	##### find_scale_components #####

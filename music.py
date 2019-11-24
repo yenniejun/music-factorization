@@ -22,13 +22,12 @@ def convert_scale(raw_scale):
 	ToDo: Add capability to sort scales
 	ToDo: Add capability to support infinitely high octaves
 	"""
-
 	scale = []
 	upper_raw_scale = [a.upper() for a in raw_scale]
 	for letter in upper_raw_scale:
 		if (letter in TWELVE_TONES.keys()):
 			scale.append(TWELVE_TONES[letter])
-	if (len(scale) > 1 and scale[-1] == scale[0] and scale[-1] < scale[-2]):
+	if (len(scale) > 1 and scale[-1] == scale[0]):
 		return scale[:-1]
 	return scale
 
@@ -41,6 +40,7 @@ def update_max_count(count, max_count, head, max_head):
 def is_correct_interval(i, scale, interval):
 	""" Checks if the value at scale[i] is an interval-size from i+1"""
 	if i >= len(scale): return False
+	if scale[i] == MINUS_MASK: return False
 	return ((scale[i] + interval) % TWELVE) == (scale[i+1] % TWELVE)
 
 
@@ -91,7 +91,6 @@ def find_scale_components(scale, interval, repeat=1):
 		scale_components: a list with all of the different contiguous components of 
 		given interval
 	"""
-
 	scale_remainder = len(scale)
 	scale_components = []
 	index = 0; len_chunk = 0; len_scale = len(scale); repeat_counter = 0;
@@ -129,7 +128,6 @@ def fetch_scale_components(list_of_intervals, scale):
 	Returns:
 		full_results: a list with all of the different contiguous components for all the intervlas 
 	"""
-
 	if (not isDescending(list_of_intervals)): 
 		return []
 	mask = [MINUS_MASK] * len(scale)
@@ -157,6 +155,9 @@ def fetch_scale_components(list_of_intervals, scale):
 				temp[0:chunk_2] = [MINUS_MASK] * chunk_2
 		results = []
 	return full_results
+
+fetch_scale_components([2,2,2],[8,10,11])
+fetch_scale_components([2,2,2],[7,9,10])
 
 
 def print_results(results):
