@@ -21,3 +21,9 @@ You can run these simply with `python3 tests.py`
 
 ## Future
 This is just the basic vision of what I want to achieve. Eventually I would like to add the UI element of showing how one scale can be split into different components in different ways, and of letting the user input their specified scale.
+
+### Some other tasks I have in mind:
+* Support non-descending scales
+* Support scales that span multiple octaves
+* Support option to sort scales or leave as they are
+* Go the other way - user specifies intervals, and we create new scales based on those constraints

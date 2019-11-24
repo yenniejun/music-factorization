@@ -31,11 +31,13 @@ def convert_scale(raw_scale):
 		return scale[:-1]
 	return scale
 
+
 def update_max_count(count, max_count, head, max_head):
 	""" Returns the updated max count and max head while determining longest count for interval"""
 	if count > max_count:
 		return (count, head)
 	return (max_count, max_head)
+
 
 def is_correct_interval(i, scale, interval):
 	""" Checks if the value at scale[i] is an interval-size from i+1"""
@@ -127,6 +129,8 @@ def fetch_scale_components(list_of_intervals, scale):
 
 	Returns:
 		full_results: a list with all of the different contiguous components for all the intervlas 
+	
+	ToDo: Eventually handle non-descending scales as well
 	"""
 	if (not isDescending(list_of_intervals)): 
 		return []
