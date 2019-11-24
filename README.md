@@ -15,6 +15,10 @@ I wanted to write something that "factorized"  scales into parts that could be u
 `A B C D E G A`
 can be understood as a combination of two 3-note segements of the whole tone scale (`C D E` and `G A B`). It can also be understood as a combination of one 2-note segment of the tritone scale (`E G`) and two 2-note segments of the whole tone scale(`A B`, `C, D`).
 
+### How to Run
+You can run `python3 main.py` and input your scale.
+Currently, I only support descending one-octave scales with the non-overlapping octave notes. i.e.: If you input `C E G C`, the last `C` is stripped away in the cleaning process. 
+
 ## Tests
 I have some rudimentary unit tests that tests each function. Eventually, would like to add mock and test some more scenarios.
 You can run these simply with `python3 tests.py`
@@ -22,7 +26,7 @@ You can run these simply with `python3 tests.py`
 ## Future
 This is just the basic vision of what I want to achieve. Eventually I would like to add the UI element of showing how one scale can be split into different components in different ways, and of letting the user input their specified scale.
 
-### Some other tasks I have in mind:
+### Some other features I have in mind:
 * Support non-descending scales
 * Support scales that span multiple octaves
 * Support option to sort scales or leave as they are
